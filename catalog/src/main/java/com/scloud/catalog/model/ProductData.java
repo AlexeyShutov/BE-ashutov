@@ -6,8 +6,8 @@ import org.springframework.data.redis.core.index.Indexed;
 
 import java.util.Objects;
 
-@RedisHash("Product")
-public class Product {
+@RedisHash("ProductData")
+public class ProductData {
 
     @Id
     private String uniqId;
@@ -26,9 +26,9 @@ public class Product {
     private String totalNumberReviews;
     private String reviews;
 
-    private Product() {}
+    private ProductData() {}
 
-    private Product(Builder builder) {
+    private ProductData(Builder builder) {
         uniqId = builder.uniqId;
         sku = builder.sku;
         nameTitle = builder.nameTitle;
@@ -111,8 +111,8 @@ public class Product {
             return this;
         }
 
-        public Product build() {
-            return new Product(this);
+        public ProductData build() {
+            return new ProductData(this);
         }
     }
 
@@ -180,21 +180,21 @@ public class Product {
         if (that == null || getClass() != that.getClass())
             return false;
 
-        Product product = (Product) that;
-        return Objects.equals(uniqId, product.uniqId) &&
-                Objects.equals(sku, product.sku) &&
-                Objects.equals(nameTitle, product.nameTitle) &&
-                Objects.equals(description, product.description) &&
-                Objects.equals(listPrice, product.listPrice) &&
-                Objects.equals(salePrice, product.salePrice) &&
-                Objects.equals(category, product.category) &&
-                Objects.equals(categoryTree, product.categoryTree) &&
-                Objects.equals(averageProductRating, product.averageProductRating) &&
-                Objects.equals(productUrl, product.productUrl) &&
-                Objects.equals(productImageUrls, product.productImageUrls) &&
-                Objects.equals(brand, product.brand) &&
-                Objects.equals(totalNumberReviews, product.totalNumberReviews) &&
-                Objects.equals(reviews, product.reviews);
+        ProductData productData = (ProductData) that;
+        return Objects.equals(uniqId, productData.uniqId) &&
+                Objects.equals(sku, productData.sku) &&
+                Objects.equals(nameTitle, productData.nameTitle) &&
+                Objects.equals(description, productData.description) &&
+                Objects.equals(listPrice, productData.listPrice) &&
+                Objects.equals(salePrice, productData.salePrice) &&
+                Objects.equals(category, productData.category) &&
+                Objects.equals(categoryTree, productData.categoryTree) &&
+                Objects.equals(averageProductRating, productData.averageProductRating) &&
+                Objects.equals(productUrl, productData.productUrl) &&
+                Objects.equals(productImageUrls, productData.productImageUrls) &&
+                Objects.equals(brand, productData.brand) &&
+                Objects.equals(totalNumberReviews, productData.totalNumberReviews) &&
+                Objects.equals(reviews, productData.reviews);
     }
 
     @Override
@@ -205,7 +205,7 @@ public class Product {
 
     @Override
     public String toString() {
-        return "Product{" +
+        return "ProductData{" +
                 "uniqId='" + uniqId + '\'' +
                 ", sku='" + sku + '\'' +
                 ", nameTitle='" + nameTitle + '\'' +

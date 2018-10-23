@@ -1,6 +1,6 @@
 package com.scloud.catalog.controller;
 
-import com.scloud.catalog.model.Product;
+import com.scloud.catalog.model.ProductData;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,7 +21,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-public class ProductControllerIT {
+public class CatalogControllerIT {
 
     private static final String ID_1 = "b6c0b6bea69c722939585baeac73c13d";
     private static final String SKU = "pp5006380337";
@@ -41,31 +41,31 @@ public class ProductControllerIT {
 
     @Test
     public void getByIdTest() {
-        Product product = restTemplate.getForObject(url.toString() + ID_1, Product.class);
-        assertNotNull(product);
-        assertEquals(ID_1, product.getUniqId());
-        assertEquals(SKU, product.getSku());
-        assertEquals("alfred dunner", product.getCategory());
+        ProductData productData = restTemplate.getForObject(url.toString() + ID_1, ProductData.class);
+        assertNotNull(productData);
+        assertEquals(ID_1, productData.getUniqId());
+        assertEquals(SKU, productData.getSku());
+        assertEquals("alfred dunner", productData.getCategory());
     }
 
     @Test
     public void getBySkuTest() {
-        var products = Arrays.asList(restTemplate.getForObject(url.toString() + "sku/" + SKU, Product[].class));
+        var products = Arrays.asList(restTemplate.getForObject(url.toString() + "sku/" + SKU, ProductData[].class));
         assertFalse(products.isEmpty());
-        for (Product product : products) {
-            assertEquals(SKU, product.getSku());
+        for (ProductData productData : products) {
+            assertEquals(SKU, productData.getSku());
         }
     }
 
     @Test
     public void getByNonExistingIdTest() {
-        ResponseEntity<Product> entity = restTemplate.getForEntity(url.toString() + "0", Product.class);
+        ResponseEntity<ProductData> entity = restTemplate.getForEntity(url.toString() + "0", ProductData.class);
         assertEquals(HttpStatus.NOT_FOUND, entity.getStatusCode());
     }
 
     @Test
     public void getByNonExistingSkuTest() {
-        ResponseEntity<Product[]> entity = restTemplate.getForEntity(url.toString() + "sku/0", Product[].class);
+        ResponseEntity<ProductData[]> entity = restTemplate.getForEntity(url.toString() + "sku/0", ProductData[].class);
         assertEquals(HttpStatus.NOT_FOUND, entity.getStatusCode());
     }
 

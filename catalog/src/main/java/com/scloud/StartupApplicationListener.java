@@ -1,7 +1,7 @@
 package com.scloud;
 
-import com.scloud.catalog.model.Product;
-import com.scloud.catalog.service.ProductService;
+import com.scloud.catalog.model.ProductData;
+import com.scloud.catalog.service.ProductDataService;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -30,11 +30,11 @@ public class StartupApplicationListener implements ApplicationListener<ContextRe
 
     private static final String ZERO = "0";
 
-    private final ProductService productService;
+    private final ProductDataService productDataService;
 
     @Autowired
-    public StartupApplicationListener(ProductService productService) {
-        this.productService = productService;
+    public StartupApplicationListener(ProductDataService productDataService) {
+        this.productDataService = productDataService;
     }
 
     @Override
@@ -43,19 +43,19 @@ public class StartupApplicationListener implements ApplicationListener<ContextRe
         try (Reader reader = new FileReader(resource.getFile());
              CSVParser csvRecords = new CSVParser(reader, CSVFormat.EXCEL.withHeader())) {
 
-            Collection<Product> products = mapToProducts(csvRecords);
-            productService.saveAll(products);
+            Collection<ProductData> productData = mapToProducts(csvRecords);
+            productDataService.saveAll(productData);
 
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    private Collection<Product> mapToProducts(Iterable<CSVRecord> csvRecords) {
-        Collection<Product> products = new ArrayList<>();
+    private Collection<ProductData> mapToProducts(Iterable<CSVRecord> csvRecords) {
+        Collection<ProductData> productData = new ArrayList<>();
 
         for (CSVRecord csvRecord : csvRecords) {
-            products.add(new Product.Builder(csvRecord.get("uniq_id"), csvRecord.get("sku"))
+            productData.add(new ProductData.Builder(csvRecord.get("uniq_id"), csvRecord.get("sku"))
                     .title(csvRecord.get("name_title"))
                     .description(csvRecord.get("description"))
                     .prices(csvRecord.get("list_price"), csvRecord.get("sale_price"))
@@ -67,7 +67,7 @@ public class StartupApplicationListener implements ApplicationListener<ContextRe
                     .build());
         }
 
-        return products;
+        return productData;
     }
 
 }
