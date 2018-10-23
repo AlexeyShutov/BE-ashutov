@@ -40,11 +40,11 @@ public class StartupApplicationListener implements ApplicationListener<ContextRe
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         Resource resource = new ClassPathResource("/jcpenney_com-ecommerce_sample.csv");
-        try (Reader reader = new FileReader(resource.getFile())) {
-            CSVParser csvRecords = new CSVParser(reader, CSVFormat.EXCEL.withHeader());
+        try (Reader reader = new FileReader(resource.getFile());
+             CSVParser csvRecords = new CSVParser(reader, CSVFormat.EXCEL.withHeader())) {
 
             Collection<Product> products = mapToProducts(csvRecords);
-            productService.save(products);
+            productService.saveAll(products);
 
         } catch (IOException e) {
             throw new IllegalStateException(e);

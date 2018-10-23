@@ -28,11 +28,11 @@ public class ProductService {
         return repository.findById(id);
     }
 
-    public List<Product> getBySku(String sku) {
+    public List<Product> getAllBySku(String sku) {
         return repository.findBySku(sku).orElse(emptyList());
     }
 
-    public void save(Collection<Product> products) {
+    public void saveAll(Collection<Product> products) {
         repository.saveAll(Optional.ofNullable(products).orElse(emptyList()));
     }
 

@@ -15,7 +15,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -51,8 +50,7 @@ public class ProductControllerIT {
 
     @Test
     public void getBySkuTest() {
-        @SuppressWarnings("unchecked")
-        List<Product> products = Arrays.asList(restTemplate.getForObject(url.toString() + "sku/" + SKU, Product[].class));
+        var products = Arrays.asList(restTemplate.getForObject(url.toString() + "sku/" + SKU, Product[].class));
         assertFalse(products.isEmpty());
         for (Product product : products) {
             assertEquals(SKU, product.getSku());

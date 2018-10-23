@@ -1,8 +1,8 @@
 package com.scloud.inventory.repository.impl;
 
-import org.springframework.stereotype.Repository;
 import com.scloud.inventory.model.ProductAvailability;
 import com.scloud.inventory.repository.ProductAvailabilityRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.HashMap;

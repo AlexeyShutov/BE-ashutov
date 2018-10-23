@@ -1,5 +1,6 @@
 package com.scloud;
 
+import com.scloud.inventory.model.ProductAvailability;
 import com.scloud.inventory.service.ProductAvailabilityService;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -9,7 +10,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
-import com.scloud.inventory.model.ProductAvailability;
 
 import java.io.FileReader;
 import java.io.IOException;

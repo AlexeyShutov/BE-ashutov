@@ -32,7 +32,7 @@ public class ProductController {
 
     @GetMapping("/sku/{sku}")
     public ResponseEntity<List<Product>> getBySku(@PathVariable String sku) {
-        List<Product> products = service.getBySku(sku);
+        List<Product> products = service.getAllBySku(sku);
         if (products.isEmpty())
             return ResponseEntity.notFound().build();
 
