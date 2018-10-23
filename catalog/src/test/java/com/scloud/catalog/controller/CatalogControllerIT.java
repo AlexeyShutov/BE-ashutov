@@ -14,19 +14,23 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
+import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class CatalogControllerIT {
 
-    private static final String ID_1 = "b6c0b6bea69c722939585baeac73c13d";
+    private static final String LOCAL_HOST = "http://localhost:";
+    private static final String IDS =
+            "b6c0b6bea69c722939585baeac73c13d,93e5272c51d8cce02597e3ce67b7ad0a,013e320f2f2ec0cf5b3ff5418d688528";
     private static final String SKU = "pp5006380337";
 
-    private URL url;
+    private URL productUrl;
+    private URL skuUrl;
 
     @LocalServerPort
     private int port;
@@ -36,21 +40,20 @@ public class CatalogControllerIT {
 
     @Before
     public void setUp() throws MalformedURLException {
-        url = new URL("http://localhost:" + port + "/product/");
+        productUrl = new URL(LOCAL_HOST + port + "/catalog/product/{ids}");
+        skuUrl = new URL(LOCAL_HOST + port + "/catalog/sku/{sku}");
     }
 
     @Test
     public void getByIdTest() {
-        ProductData productData = restTemplate.getForObject(url.toString() + ID_1, ProductData.class);
-        assertNotNull(productData);
-        assertEquals(ID_1, productData.getUniqId());
-        assertEquals(SKU, productData.getSku());
-        assertEquals("alfred dunner", productData.getCategory());
+        var productsData = List.of(restTemplate.getForObject(productUrl.toString(), ProductData[].class, IDS));
+        assertEquals(IDS.split(",").length, productsData.size());
+        productsData.forEach(prodData -> assertEquals(SKU, prodData.getSku()));
     }
 
     @Test
     public void getBySkuTest() {
-        var products = Arrays.asList(restTemplate.getForObject(url.toString() + "sku/" + SKU, ProductData[].class));
+        var products = List.of(restTemplate.getForObject(skuUrl.toString(), ProductData[].class, SKU));
         assertFalse(products.isEmpty());
         for (ProductData productData : products) {
             assertEquals(SKU, productData.getSku());
@@ -59,14 +62,14 @@ public class CatalogControllerIT {
 
     @Test
     public void getByNonExistingIdTest() {
-        ResponseEntity<ProductData> entity = restTemplate.getForEntity(url.toString() + "0", ProductData.class);
-        assertEquals(HttpStatus.NOT_FOUND, entity.getStatusCode());
+        var responseEntity = restTemplate.getForEntity(productUrl.toString(), ProductData.class, "0");
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
     }
 
     @Test
     public void getByNonExistingSkuTest() {
-        ResponseEntity<ProductData[]> entity = restTemplate.getForEntity(url.toString() + "sku/0", ProductData[].class);
-        assertEquals(HttpStatus.NOT_FOUND, entity.getStatusCode());
+        var responseEntity = restTemplate.getForEntity(skuUrl.toString(), ProductData.class, "1");
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
     }
 
 }
