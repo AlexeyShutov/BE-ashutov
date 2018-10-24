@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @RestController
-@RequestMapping("/availability")
+@RequestMapping("/inventory/availability")
 public class ProductAvailabilityController {
 
     private final ProductAvailabilityService service;

@@ -35,18 +35,18 @@ public class ProductAvailabilityControllerIT {
 
     @Before
     public void setUp() throws MalformedURLException {
-        url = new URL("http://localhost:" + port + "/availability/");
+        url = new URL("http://localhost:" + port + "/inventory/availability/{ids}");
     }
 
     @Test
     public void getByIdTest() {
-        var productAvailabilities = asList(restTemplate.getForObject(url.toString() + IDS, ProductAvailability[].class));
+        var productAvailabilities = asList(restTemplate.getForObject(url.toString(), ProductAvailability[].class, IDS));
         assertEquals(IDS.split(",").length, productAvailabilities.size());
     }
 
     @Test
     public void getByNonExistingIdTest() {
-        var responseEntity = restTemplate.getForEntity(url.toString() + "0", ProductAvailability.class);
+        var responseEntity = restTemplate.getForEntity(url.toString(), ProductAvailability.class, "0");
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
     }
 }
