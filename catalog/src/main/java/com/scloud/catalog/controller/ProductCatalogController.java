@@ -12,17 +12,17 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/catalog")
-public class CatalogController {
+@RequestMapping("/catalog/product")
+public class ProductCatalogController {
 
     private final ProductDataService service;
 
     @Autowired
-    public CatalogController(ProductDataService service) {
+    public ProductCatalogController(ProductDataService service) {
         this.service = service;
     }
 
-    @GetMapping("/product/{ids}")
+    @GetMapping("/{ids}")
     public ResponseEntity<List<ProductData>> getAllByIds(@PathVariable String ids) {
         List<ProductData> products = service.getAllById(ids);
         return products.isEmpty() ? ResponseEntity.notFound().build()

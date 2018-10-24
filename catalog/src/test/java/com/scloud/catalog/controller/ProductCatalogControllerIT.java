@@ -9,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.net.MalformedURLException;
@@ -22,7 +21,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-public class CatalogControllerIT {
+public class ProductCatalogControllerIT {
 
     private static final String LOCAL_HOST = "http://localhost:";
     private static final String IDS =
@@ -41,7 +40,7 @@ public class CatalogControllerIT {
     @Before
     public void setUp() throws MalformedURLException {
         productUrl = new URL(LOCAL_HOST + port + "/catalog/product/{ids}");
-        skuUrl = new URL(LOCAL_HOST + port + "/catalog/sku/{sku}");
+        skuUrl = new URL(LOCAL_HOST + port + "/catalog/product/sku/{sku}");
     }
 
     @Test
