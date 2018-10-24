@@ -46,7 +46,8 @@ public class ProductAvailabilityControllerIT {
 
     @Test
     public void getByNonExistingIdTest() {
-        var responseEntity = restTemplate.getForEntity(url.toString(), ProductAvailability.class, "0");
+        var responseEntity = restTemplate.getForEntity(url.toString(), ProductAvailability[].class, "0");
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
     }
+
 }
