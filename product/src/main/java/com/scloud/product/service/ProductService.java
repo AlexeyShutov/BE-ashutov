@@ -18,9 +18,9 @@ import java.util.stream.Collectors;
 public class ProductService {
 
     private final RestTemplate restTemplate;
-    private static final String CATALOG_ID_URL = "http://localhost:8080/catalog/product/{ids}";
-    private static final String CATALOG_SKU_URL = "http://localhost:8080/catalog/product/sku/{sku}";
-    private static final String INVENTORY_URL = "http://localhost:8081/inventory/availability/{ids}";
+    private static final String CATALOG_ID_URL = "http://catalog-service/catalog/product/{ids}";
+    private static final String CATALOG_SKU_URL = "http://catalog-service/catalog/product/sku/{sku}";
+    private static final String INVENTORY_URL = "http://inventory-service/inventory/availability/{ids}";
 
     @Autowired
     public ProductService(RestTemplate restTemplate) {
