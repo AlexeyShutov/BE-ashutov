@@ -48,7 +48,6 @@ public class ProductService {
 
     public List<Product> getAvailableProductsBySku(String sku) {
         ResponseEntity<Product[]> productsResponse;
-
         try {
             productsResponse = restTemplate.getForEntity(CATALOG_SKU_URL, Product[].class, sku);
         } catch (HttpClientErrorException e) {
