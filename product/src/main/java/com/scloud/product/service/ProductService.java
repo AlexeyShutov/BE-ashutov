@@ -1,6 +1,9 @@
 package com.scloud.product.service;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import com.scloud.product.exception.ProductNotFoundException;
+import com.scloud.exception.ServiceUnavailableException;
 import com.scloud.product.model.Product;
 import com.scloud.product.model.ProductAvailability;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +24,7 @@ public class ProductService {
     private static final String CATALOG_ID_URL = "http://catalog-service/catalog/product/{ids}";
     private static final String CATALOG_SKU_URL = "http://catalog-service/catalog/product/sku/{sku}";
     private static final String INVENTORY_URL = "http://inventory-service/inventory/availability/{ids}";
+    private static final String HEAVY_URL = "http://catalog-service/catalog/product/heavy/{ids}?delay={sec}";
 
     @Autowired
     public ProductService(RestTemplate restTemplate) {
@@ -46,6 +50,27 @@ public class ProductService {
         return responseArrayToList(productResponse);
     }
 
+    @HystrixCommand(commandProperties = {
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "3000"),
+            @HystrixProperty(name = "circuitBreaker.sleepWindowInMilliseconds", value = "60000"),
+            @HystrixProperty(name = "metrics.rollingStats.timeInMilliseconds", value = "20000"),
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "5"),
+            @HystrixProperty(name = "circuitBreaker.errorThresholdPercentage", value = "80")
+    })
+    public List<Product> getHeavyProductsByIds(String ids, Long delay) {
+        ResponseEntity<Product[]> productResponse;
+        try {
+            productResponse = restTemplate.getForEntity(HEAVY_URL, Product[].class, ids, delay);
+        } catch (HttpClientErrorException e) {
+            if (HttpStatus.NOT_FOUND == e.getStatusCode())
+                throw new ProductNotFoundException("Product id not found: " + ids, e);
+
+            throw new IllegalStateException(e);
+        }
+
+        return responseArrayToList(productResponse);
+    }
+
     public List<Product> getAvailableProductsBySku(String sku) {
         ResponseEntity<Product[]> productsResponse;
         try {
@@ -66,9 +91,15 @@ public class ProductService {
         var availabilityResponse = restTemplate.getForEntity(INVENTORY_URL, ProductAvailability[].class, productIds);
         String availableProductIds = getAvailableProductIds(availabilityResponse);
 
-       return products.stream()
+        return products.stream()
                 .filter(product -> availableProductIds.contains(product.getUniqId()))
                 .collect(Collectors.toList());
+    }
+
+    @SuppressWarnings("unused")
+    @HystrixCommand(ignoreExceptions = ServiceUnavailableException.class)
+    private List<Product> fallbackServiceTimedOutException(String ids, Long delay) {
+        throw new ServiceUnavailableException("Service unavailable");
     }
 
     private <T> List<T> responseArrayToList(ResponseEntity<T[]> responseArray) {

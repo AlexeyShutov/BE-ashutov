@@ -1,13 +1,12 @@
 package com.scloud.product.controller;
 
+import com.netflix.hystrix.exception.HystrixRuntimeException;
+import com.netflix.hystrix.exception.HystrixTimeoutException;
+import com.scloud.exception.ServiceUnavailableException;
 import com.scloud.product.model.Product;
 import com.scloud.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -30,5 +29,18 @@ public class ProductController {
     @GetMapping("/sku/{sku}")
     public List<Product> getAllBySku(@PathVariable String sku) {
         return productService.getAvailableProductsBySku(sku);
+    }
+
+    @GetMapping("/heavy/{ids}")
+    public List<Product> getAllHeavyById(@PathVariable String ids,
+                                         @RequestParam Long delay) {
+        try { //TODO: @ControlledAdvice
+            return productService.getHeavyProductsByIds(ids, delay);
+        } catch (HystrixRuntimeException e) {
+            if (e.getFallbackException().getCause() instanceof HystrixTimeoutException)
+                throw new ServiceUnavailableException("Service timed-out");
+            else
+                throw new ServiceUnavailableException("The error threshold crossed, service is temporary down");
+        }
     }
 }
