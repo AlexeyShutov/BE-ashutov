@@ -22,6 +22,7 @@ dependencies {
     compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-eureka-client',
             version: '2.0.2.RELEASE', { exclude group: 'com.google.code.gson', module: 'gson' }
     compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-sleuth', version: '2.0.2.RELEASE'
+    compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-zipkin', version: '2.0.2.RELEASE'
     testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.0.6.RELEASE'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
