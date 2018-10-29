@@ -8,6 +8,7 @@ import com.scloud.product.model.Product;
 import com.scloud.product.model.ProductAvailability;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -22,10 +23,14 @@ import java.util.stream.Collectors;
 @Service
 public class ProductService {
 
-    private static final String CATALOG_ID_URL = "http://catalog-service/catalog/product/{ids}";
-    private static final String CATALOG_SKU_URL = "http://catalog-service/catalog/product/sku/{sku}";
-    private static final String INVENTORY_URL = "http://inventory-service/inventory/availability/{ids}";
-    private static final String HEAVY_URL = "http://catalog-service/catalog/product/heavy/{ids}?delay={sec}";
+    @Value("${services.catalog-product-url}")
+    private String catalogIdUrl;
+    @Value("${services.catalog-product-sku-url}")
+    private String catalogSkuUrl;
+    @Value("${services.inventory-availability-url}")
+    private String inventoryUrl;
+    @Value("${services.heavy-product-url}")
+    private String heavyUrl;
 
     private final RestTemplate restTemplate;
 
@@ -38,7 +43,7 @@ public class ProductService {
         log.info("Checking availability of the following products: {}", ids);
         ResponseEntity<ProductAvailability[]> availabilityResponse;
         try {
-            availabilityResponse = restTemplate.getForEntity(INVENTORY_URL, ProductAvailability[].class, ids);
+            availabilityResponse = restTemplate.getForEntity(inventoryUrl, ProductAvailability[].class, ids);
         } catch (HttpClientErrorException e) {
             if (HttpStatus.NOT_FOUND == e.getStatusCode())
                 throw new ProductNotFoundException("Product id not found: " + ids, e);
@@ -51,7 +56,7 @@ public class ProductService {
             return List.of();
 
         log.info("Fetching available products: {}", availableIds);
-        var productResponse = restTemplate.getForEntity(CATALOG_ID_URL, Product[].class, availableIds);
+        var productResponse = restTemplate.getForEntity(catalogIdUrl, Product[].class, availableIds);
         return responseArrayToList(productResponse);
     }
 
@@ -66,7 +71,7 @@ public class ProductService {
         log.info("Trying to fetch heavy products: {}", ids);
         ResponseEntity<Product[]> productResponse;
         try {
-            productResponse = restTemplate.getForEntity(HEAVY_URL, Product[].class, ids, delay);
+            productResponse = restTemplate.getForEntity(heavyUrl, Product[].class, ids, delay);
         } catch (HttpClientErrorException e) {
             if (HttpStatus.NOT_FOUND == e.getStatusCode())
                 throw new ProductNotFoundException("Product id not found: " + ids, e);
@@ -81,7 +86,7 @@ public class ProductService {
         log.info("Getting the products by sku: {}", sku);
         ResponseEntity<Product[]> productsResponse;
         try {
-            productsResponse = restTemplate.getForEntity(CATALOG_SKU_URL, Product[].class, sku);
+            productsResponse = restTemplate.getForEntity(catalogSkuUrl, Product[].class, sku);
         } catch (HttpClientErrorException e) {
             if (HttpStatus.NOT_FOUND == e.getStatusCode())
                 throw new ProductNotFoundException("Product sku not found: " + sku, e);
@@ -95,7 +100,7 @@ public class ProductService {
                 .map(Product::getUniqId)
                 .collect(Collectors.joining(","));
 
-        var availabilityResponse = restTemplate.getForEntity(INVENTORY_URL, ProductAvailability[].class, productIds);
+        var availabilityResponse = restTemplate.getForEntity(inventoryUrl, ProductAvailability[].class, productIds);
         String availableProductIds = getAvailableProductIds(availabilityResponse);
         log.info("The available products are: {}", availableProductIds);
 
@@ -123,4 +128,5 @@ public class ProductService {
                 .map(ProductAvailability::getUniqId)
                 .collect(Collectors.joining(","));
     }
+
 }
