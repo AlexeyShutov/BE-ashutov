@@ -34,13 +34,21 @@ public class ProductController {
     @GetMapping("/heavy/{ids}")
     public List<Product> getAllHeavyById(@PathVariable String ids,
                                          @RequestParam Long delay) {
-        try { //TODO: @ControlledAdvice
+        try {
             return productService.getHeavyProductsByIds(ids, delay);
         } catch (HystrixRuntimeException e) {
-            if (e.getFallbackException().getCause() instanceof HystrixTimeoutException)
-                throw new ServiceUnavailableException("Service timed-out");
-            else
-                throw new ServiceUnavailableException("The error threshold crossed, service is temporary down");
+            handleHystrixRuntimeException(e);
+            return List.of();
         }
+    }
+
+    private void handleHystrixRuntimeException(HystrixRuntimeException e) {
+        Throwable cause = e.getFallbackException().getCause();
+        if (cause instanceof HystrixTimeoutException)
+            throw new ServiceUnavailableException("Service timed-out");
+        else if (cause instanceof RuntimeException)
+            throw new ServiceUnavailableException("The error threshold crossed, service is temporary down");
+        else
+            throw new RuntimeException(cause);
     }
 }
