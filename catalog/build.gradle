@@ -1,28 +1,50 @@
-plugins {
-    id 'java'
+buildscript {
+    ext {
+        springBootVersion = '2.0.6.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
 }
 
-group 'com.scloud.microservices'
-version '1.0-SNAPSHOT'
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.springframework.boot' version '2.0.6.RELEASE'
+}
 
 sourceCompatibility = 1.10
-targetCompatibility = 1.10
+mainClassName = 'com.scloud.CatalogApp'
+
+bootJar {
+    baseName = 'catalog-service'
+    version = '1.0-SNAPSHOT'
+    group = 'com.scloud.microservices'
+}
 
 repositories {
     mavenCentral()
 }
 
+ext {
+    springCloudVersion = '2.0.2.RELEASE'
+    springDataVersion = '2.1.0.RELEASE'
+}
+
 dependencies {
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.0.6.RELEASE'
-    compile group: 'org.apache.commons', name: 'commons-csv', version: '1.4'
-    compile group: 'com.google.guava', name: 'guava', version: '19.0'
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8'
-    compile group: 'org.springframework.data', name: 'spring-data-redis', version: '2.1.0.RELEASE'
+    compile "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+    compile "org.springframework.data:spring-data-redis:${springDataVersion}"
+    compile "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:${springCloudVersion}",
+            { exclude group: 'com.google.code.gson', module: 'gson' }
+    compile "org.springframework.cloud:spring-cloud-starter-sleuth:${springCloudVersion}"
+    compile "org.springframework.cloud:spring-cloud-starter-zipkin:${springCloudVersion}"
     compile group: 'redis.clients', name: 'jedis', version: '2.9.0'
-    compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-eureka-client',
-            version: '2.0.2.RELEASE', { exclude group: 'com.google.code.gson', module: 'gson' }
-    compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-sleuth', version: '2.0.2.RELEASE'
-    compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-zipkin', version: '2.0.2.RELEASE'
-    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.0.6.RELEASE'
+    compile group: 'com.google.guava', name: 'guava', version: '19.0'
+    compile group: 'org.apache.commons', name: 'commons-csv', version: '1.4'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8'
+    testCompile "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

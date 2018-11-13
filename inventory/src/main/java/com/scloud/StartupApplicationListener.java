@@ -11,8 +11,9 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
-import java.io.FileReader;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Collection;
 import java.util.Random;
@@ -34,7 +35,7 @@ public class StartupApplicationListener implements ApplicationListener<ContextRe
     public void onApplicationEvent(ContextRefreshedEvent event) {
         Resource resource = new ClassPathResource("/jcpenney_com-ecommerce_id.csv");
 
-        try (Reader reader = new FileReader(resource.getFile());
+        try (Reader reader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
              CSVParser csvRecords = new CSVParser(reader, CSVFormat.EXCEL.withHeader())) {
 
             var products = mapToProductAvailability(csvRecords);

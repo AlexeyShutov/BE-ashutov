@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 
+// FIXME product service test only for docker profile
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ProductControllerIT {
@@ -44,7 +45,7 @@ public class ProductControllerIT {
 
     @Before
     public void setUp() throws MalformedURLException {
-        inventoryUrl = new URL(LOCAL_HOST + 8081 + "/inventory/availability/{ids}");
+        inventoryUrl = new URL(LOCAL_HOST + 8082 + "/inventory/availability/{ids}");
         productUrl = new URL(LOCAL_HOST + port + "/product/{ids}");
         skuUrl = new URL(LOCAL_HOST + port + "/product/sku/{sku}");
         heavyUrl = new URL(LOCAL_HOST + port + "/product/heavy/{ids}?delay={sec}");

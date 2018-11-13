@@ -12,9 +12,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -40,7 +38,7 @@ public class StartupApplicationListener implements ApplicationListener<ContextRe
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         Resource resource = new ClassPathResource("/jcpenney_com-ecommerce_sample.csv");
-        try (Reader reader = new FileReader(resource.getFile());
+        try (Reader reader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
              CSVParser csvRecords = new CSVParser(reader, CSVFormat.EXCEL.withHeader())) {
 
             Collection<ProductData> productData = mapToProducts(csvRecords);

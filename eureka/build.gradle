@@ -1,21 +1,43 @@
-plugins {
-    id 'java'
+buildscript {
+    ext {
+        springBootVersion = '2.0.6.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
 }
 
-group 'com.scloud.microservices'
-version '1.0-SNAPSHOT'
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.springframework.boot' version '2.0.6.RELEASE'
+}
 
 sourceCompatibility = 1.10
+mainClassName = 'com.scloud.ServiceDiscoveryApp'
+
+bootJar {
+    baseName = 'discovery-service'
+    version = '1.0-SNAPSHOT'
+    group = 'com.scloud.microservices'
+}
 
 repositories {
     mavenCentral()
 }
 
+ext {
+    jaxbVersion = '2.3.1'
+}
+
 dependencies {
+    compile "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
     compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-eureka-server', 
-            version: '2.0.1.RELEASE', { exclude group: 'com.google.code.gson', module: 'gson' }
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.0.6.RELEASE'
-    compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
-    compile group: 'com.sun.xml.bind', name: 'jaxb-impl', version: '2.3.1'
+            version: '2.0.2.RELEASE', { exclude group: 'com.google.code.gson', module: 'gson' }
+    compile "javax.xml.bind:jaxb-api:${jaxbVersion}"
+    compile "com.sun.xml.bind:jaxb-impl:${jaxbVersion}"
     compile group: 'com.sun.xml.bind', name: 'jaxb-core', version: '2.3.0.1'
 }

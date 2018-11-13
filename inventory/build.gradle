@@ -1,24 +1,45 @@
-plugins {
-    id 'java'
+buildscript {
+    ext {
+        springBootVersion = '2.0.6.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
 }
 
-group 'com.scloud.microservices'
-version '1.0-SNAPSHOT'
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.springframework.boot' version '2.0.6.RELEASE'
+}
 
 sourceCompatibility = 1.10
-targetCompatibility = 1.10
+mainClassName = 'com.scloud.InventoryApp'
 
 repositories {
     mavenCentral()
 }
 
+bootJar {
+    baseName = 'inventory-service'
+    version = '1.0-SNAPSHOT'
+    group = 'com.scloud.microservices'
+}
+
+ext {
+    springCloudVersion = '2.0.2.RELEASE'
+}
+
 dependencies {
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.0.6.RELEASE'
+    compile "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+    compile "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:${springCloudVersion}",
+             { exclude group: 'com.google.code.gson', module: 'gson' }
+    compile "org.springframework.cloud:spring-cloud-starter-sleuth:${springCloudVersion}"
+    compile "org.springframework.cloud:spring-cloud-starter-zipkin:${springCloudVersion}"
     compile group: 'org.apache.commons', name: 'commons-csv', version: '1.4'
-    compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-eureka-client',
-            version: '2.0.2.RELEASE', { exclude group: 'com.google.code.gson', module: 'gson' }
-    compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-sleuth', version: '2.0.2.RELEASE'
-    compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-zipkin', version: '2.0.2.RELEASE'
-    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.0.6.RELEASE'
+    testCompile "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
