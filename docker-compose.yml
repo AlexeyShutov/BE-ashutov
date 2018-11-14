@@ -5,9 +5,6 @@ services:
     image: redis:5.0.0-alpine
     ports:
       - 6379:6379
-    environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
 
   zipkin:
     image: openzipkin/zipkin
@@ -36,6 +33,8 @@ services:
       EUREKA_PORT: 8761
       ZIPKIN_HOST: zipkin
       ZIPKIN_PORT: 9411
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
     depends_on:
       - redis
       - eureka
