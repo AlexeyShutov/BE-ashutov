@@ -48,7 +48,7 @@ public class ProductServiceTest {
     public void getAvailableProductsByIdsTest() {
         when(restTemplate.getForEntity(INVENTORY_SERVICE, ProductAvailability[].class, IDS))
                 .thenReturn(buildAvailableProductsResponse(AVAILABLE_IDS));
-        when(restTemplate.getForEntity(CATALOG_SERVICE, Product[].class, AVAILABLE_IDS))
+        when(restTemplate.getForEntity(CATALOG_SERVICE, Product[].class, IDS))
                 .thenReturn(buildProductsResponse(AVAILABLE_IDS));
 
         var products = service.getAvailableProductsByIds(IDS);
