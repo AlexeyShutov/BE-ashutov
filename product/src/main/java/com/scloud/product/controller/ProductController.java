@@ -1,8 +1,7 @@
 package com.scloud.product.controller;
 
 import com.netflix.hystrix.exception.HystrixRuntimeException;
-import com.netflix.hystrix.exception.HystrixTimeoutException;
-import com.scloud.exception.ServiceUnavailableException;
+import com.scloud.product.exception.handler.ExceptionHandler;
 import com.scloud.product.model.Product;
 import com.scloud.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,15 +14,21 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    private final ExceptionHandler exceptionHandler;
 
     @Autowired
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, ExceptionHandler exceptionHandler) {
         this.productService = productService;
+        this.exceptionHandler = exceptionHandler;
     }
 
     @GetMapping("/{ids}")
     public List<Product> getAllByIds(@PathVariable String ids) {
-        return productService.getAvailableProductsByIds(ids);
+        try {
+            return productService.getAvailableProductsByIds(ids);
+        } catch (HystrixRuntimeException e) {
+            throw new RuntimeException(e.getCause());
+        }
     }
 
     @GetMapping("/sku/{sku}")
@@ -37,18 +42,7 @@ public class ProductController {
         try {
             return productService.getHeavyProductsByIds(ids, delay);
         } catch (HystrixRuntimeException e) {
-            handleHystrixRuntimeException(e);
-            return List.of();
+            throw exceptionHandler.unwrap(e);
         }
-    }
-
-    private void handleHystrixRuntimeException(HystrixRuntimeException e) {
-        Throwable cause = e.getFallbackException().getCause();
-        if (cause instanceof HystrixTimeoutException)
-            throw new ServiceUnavailableException("Service timed-out");
-        else if (cause instanceof RuntimeException)
-            throw new ServiceUnavailableException("The error threshold crossed, service is temporary down");
-        else
-            throw new RuntimeException(cause);
     }
 }

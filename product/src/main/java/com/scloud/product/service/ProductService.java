@@ -2,8 +2,10 @@ package com.scloud.product.service;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
-import com.scloud.product.exception.ProductNotFoundException;
 import com.scloud.exception.ServiceUnavailableException;
+import com.scloud.product.exception.ProductNotFoundException;
+import com.scloud.product.hystrix.ProductAvailabilityCommand;
+import com.scloud.product.hystrix.ProductCatalogCommand;
 import com.scloud.product.model.Product;
 import com.scloud.product.model.ProductAvailability;
 import lombok.extern.slf4j.Slf4j;
@@ -14,10 +16,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import rx.Observable;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.scloud.util.ResponseUtils.responseArrayToList;
 
 @Slf4j
 @Service
@@ -41,23 +45,18 @@ public class ProductService {
 
     public List<Product> getAvailableProductsByIds(String ids) {
         log.info("Checking availability of the following products: {}", ids);
-        ResponseEntity<ProductAvailability[]> availabilityResponse;
-        try {
-            availabilityResponse = restTemplate.getForEntity(inventoryUrl, ProductAvailability[].class, ids);
-        } catch (HttpClientErrorException e) {
-            if (HttpStatus.NOT_FOUND == e.getStatusCode())
-                throw new ProductNotFoundException("Product id not found: " + ids, e);
+        var availabilityCommand = new ProductAvailabilityCommand(restTemplate, inventoryUrl, ids);
+        var catalogCommand = new ProductCatalogCommand(restTemplate, catalogIdUrl, ids);
+        var availabilityResponse = availabilityCommand.toObservable();
+        var catalogResponse = catalogCommand.toObservable();
 
-            throw new IllegalStateException(e);
-        }
-
-        String availableIds = getAvailableProductIds(availabilityResponse);
-        if (availableIds.isEmpty())
-            return List.of();
-
-        log.info("Fetching available products: {}", availableIds);
-        var productResponse = restTemplate.getForEntity(catalogIdUrl, Product[].class, availableIds);
-        return responseArrayToList(productResponse);
+        return Observable.zip(availabilityResponse, catalogResponse, (availability, catalog) -> {
+            String availableIds = getAvailableProductIds(availability);
+            log.info("Fetching available products: {}", availableIds);
+            return responseArrayToList(catalog).stream()
+                    .filter(product -> availableIds.contains(product.getUniqId()))
+                    .collect(Collectors.toList());
+        }).toBlocking().single();
     }
 
     @HystrixCommand(commandProperties = {
@@ -113,13 +112,6 @@ public class ProductService {
     @HystrixCommand(ignoreExceptions = ServiceUnavailableException.class)
     private List<Product> fallbackServiceTimedOutException(String ids, Long delay) {
         throw new ServiceUnavailableException("Service unavailable");
-    }
-
-    private <T> List<T> responseArrayToList(ResponseEntity<T[]> responseArray) {
-        return Optional.ofNullable(responseArray)
-                .map(ResponseEntity::getBody)
-                .map(List::of)
-                .orElse(List.of());
     }
 
     private String getAvailableProductIds(ResponseEntity<ProductAvailability[]> availabilityResponse) {
